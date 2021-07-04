@@ -6,9 +6,7 @@ from pygame.gfxdraw import aacircle
 from pygame import gfxdraw
 import random
 import time
-from numba import int32, float32 ,boolean   # import the types
-from numba.experimental import jitclass
-
+import numpy as np
 import sys
 
 sys.setrecursionlimit(10000)
@@ -26,6 +24,8 @@ GREEN = (0,250,0)
 RED=(255,0,0)
 PointRadius=3
 CAPACITY = 5
+ox,oy = WIDTH//2,HIGHT//2
+
 screen = pygame.display.set_mode((WIDTH,HIGHT))
 
 clock = pygame.time.Clock()
@@ -162,16 +162,6 @@ class QuadTree(object):
 ox,oy = WIDTH//2,HIGHT//2
 
 
-spec = [
-    ('x', int32),
-    ('y', int32),
-    ('vx', int32),
-    ('vy', int32),
-    ('mass', int32),
-    ('intersect', boolean),
-]
-
-# @jitclass(spec)
 class Point(object):
 	"""docstring for Points"""
 	def __init__(self, x=None,y=None,vx=0,vy=0,mass=1):
@@ -182,6 +172,7 @@ class Point(object):
 		self.vy = vy
 		self.mass = mass
 		self.intersect=False
+		
 
 	def display(self,Color=None):
 		# circle(screen, WHITE if self.intersect else GRAY ,(int(self.x),int(self.y)),PointRadius)
@@ -190,17 +181,19 @@ class Point(object):
 
 
 	def randomWalk(self):
-		self.x += random.randint(-10,10)/5
-		self.y += random.randint(-10,10)/5
+		global ox,oy
+		self.x += random.randint(-10,10)/3
+		self.y += random.randint(-10,10)/3
 
 		# dist=self.dist((ox,oy),(self.x,self.y))+5
-		# self.x += (ox-self.x)/dist**2
-		# self.y += (oy-self.y)/dist**2
+		# self.x += (ox-self.x)/dist
+		# self.y += (oy-self.y)/dist
 
 
 		# ox,oy = WIDTH//2,HIGHT//2
 		# ox+=100
 		# oy+=100
+		# print(ox,oy)
 		# self.x -= (self.x-ox ) *0.001
 		# self.y -= (self.y-oy ) *0.001
 		# dx=self.dist((ox,oy),(self.x,self.y))
@@ -249,6 +242,17 @@ class Universe(object):
 			point=Point()
 			self.allPoints.append(point)
 			self.Tree.insert(point)
+
+		for i in range(30):
+			point=Point(HIGHT//2+100+random.randint(-30,30),WIDTH//2+100+random.randint(-30,30))
+			self.allPoints.append(point)
+			self.Tree.insert(point)
+
+		for i in range(30):
+			point=Point(HIGHT//2-100+random.randint(-30,30),WIDTH//2-100+random.randint(-30,30))
+			self.allPoints.append(point)
+			self.Tree.insert(point)
+
 
 	def display(self):
 		for Point in self.allPoints:
@@ -407,7 +411,7 @@ def light(ROOT):
 	except Exception as e:
 		print(e)
 
-U =Universe(500)
+U =Universe(100)
 
 # p1=Point(x=HIGHT//2,y=WIDTH//2+100,vx=-5,mass=10)
 # p2=Point(x=HIGHT//2,y=WIDTH//2-100,vx=5,mass=10)
@@ -425,7 +429,7 @@ Inital_pos = (int(WIDTH/2),int(HIGHT))
 while RUN:
 	screen.fill(DARKGRAY)
 	# time.sleep(0.1)
-	screen.blit(update_fps(), (10,0))
+	# screen.blit(update_fps(), (10,0))
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
 			RUN=False
