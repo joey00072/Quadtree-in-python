@@ -141,8 +141,6 @@ class QuadTree(object):
 			for point in self.Points:
 				if point.x>=START_x and point.y>=START_y and point.x<=END_x and point.y<=END_y:
 					cnt.append(point)
-		# print(self.name,len(cnt))
-		# print("74HDHH")
 		return cnt
 
 	def draw(self,deplth=0):
